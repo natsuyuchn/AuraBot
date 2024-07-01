@@ -1,0 +1,12 @@
+{
+	"geode": "3.1.1",
+	"gd": {
+		"android": "2.206",
+		"win": "2.206"
+	},
+	"version": "v1.0.0",
+	"id": "natsusu.aurabot",
+	"name": "AuraBot",
+	"developer": "Natsusu",
+	"description": "Multi-platform Geometry Dash bot which supports platformer."
+}
