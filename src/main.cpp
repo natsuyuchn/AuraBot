@@ -1,32 +1,16 @@
 #include <Geode/Geode.hpp>
+#include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <imgui-cocos.hpp>
+#include "ReplayEngine.hpp"
+#include "RecordLayer.hpp"
 
 using namespace geode::prelude;
 
-/**
- * `$modify` lets you extend and modify GD's classes.
- * To hook a function in Geode, simply $modify the class
- * and write a new function definition with the signature of
- * the function you want to hook.
- *
- * Here we use the overloaded `$modify` macro to set our own class name,
- * so that we can use it for button callbacks.
- *
- * Notice the header being included, you *must* include the header for
- * the class you are modifying, or you will get a compile error.
- *
- * Another way you could do this is like this:
- *
- * struct MyMenuLayer : Modify<MyMenuLayer, MenuLayer> {};
- */
-#include <Geode/modify/MenuLayer.hpp>
+ReplayEngine engine;
+bool show = false;
+
 class $modify(MyMenuLayer, MenuLayer) {
-	/**
-	 * Typically classes in GD are initialized using the `init` function, (though not always!),
-	 * so here we use it to add our own button to the bottom menu.
-	 *
-	 * Note that for all hooks, your signature has to *match exactly*,
-	 * `void init()` would not place a hook!
-	*/
 	bool init() {
 		if (!MenuLayer::init()) {
 			return false;
@@ -51,6 +35,71 @@ class $modify(MyMenuLayer, MenuLayer) {
 	}
 
 	void onMyButton(CCObject*) {
-		FLAlertLayer::create("Geode", "Hello from my custom mod!", "OK")->show();
+		FLAlertLayer::create("Geode", "El que lo lea es puto :3 2", "OK")->show();
 	}
+};
+
+class $modify(AuraPauseLayer, PauseLayer) {
+	void customSetup() {
+		PauseLayer::customSetup();
+
+		CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_likeBtn_001.png");
+
+		auto button = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(AuraPauseLayer::onButton));
+		button->setID("aurabot"_spr);
+		button->setScale(0.35f);
+
+		auto menu = this->getChildByID("left-button-menu");
+		menu->addChild(button);
+
+		menu->updateLayout();
+	};
+
+	void onButton(CCObject*) {
+		// RecordLayer::create()->show();
+		// log::info("...");
+		show = !show;
+	};
+};
+
+$on_mod(Loaded) {
+	ImGuiCocos::get().setup([] {
+
+	}).draw([] {
+
+		if (!show) return;
+
+    	static auto log = "Record/Replay or Save/Load Macros!";
+    	ImGui::SetNextWindowPos(ImVec2(5, 15));
+    	ImGui::Begin("cheap replay bot :fire:", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
+    	ImGui::Text("El pepe uwu");
+
+    	ImGui::SameLine();
+
+    	int state = engine.state;
+
+    	if (ImGui::RadioButton("Disable", &state, 0)) {
+    	    engine.state = ReplayState::Disabled;
+		};
+
+    	ImGui::SameLine();
+
+    	if (ImGui::RadioButton("Record", &state, 1)) {
+    	    if (engine.state != ReplayState::Recording)
+    	        engine.actions.clear();
+    	    engine.state = ReplayState::Recording;
+    	};
+
+    	ImGui::SameLine();
+
+    	if (ImGui::RadioButton("Play", &state, 2)) {
+    		engine.state = ReplayState::Playing;
+		};
+
+    	ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+
+		// char *macroName = engine.macroName.c_str();
+
+    	// ImGui::InputText("##replay_name", macroName, IM_ARRAYSIZE(macroName));
+	});
 };

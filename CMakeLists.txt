@@ -8,7 +8,8 @@ project(AuraBot VERSION 1.0.0)
 
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp
-    # Add any extra C++ source files here
+    src/ReplayEngine.cpp
+    src/RecordLayer.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})
@@ -18,5 +19,9 @@ else()
 endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+CPMAddPackage("gh:matcool/gd-imgui-cocos#09a9555")
+
+target_link_libraries(${PROJECT_NAME} imgui-cocos)
 
 setup_geode_mod(${PROJECT_NAME})
